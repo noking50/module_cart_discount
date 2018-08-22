@@ -1,0 +1,29 @@
+{
+    "name": "noking50/module_cart_discount",
+    "description": "The module of cart discount",
+    "keywords": ["laravel"],
+    "authors": [
+        {
+            "name": "noking50",
+            "email": "noking50@gmail.com"
+        }
+    ],
+    "require": {
+        "noking50/module_required": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Noking50\\Modules\\Cart\\Discount\\": "src/Module"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Noking50\\Modules\\Cart\\Discount\\Providers\\DiscountServiceProvider"
+            ],
+            "aliases": {
+                "CartDiscount": "Noking50\\Modules\\Cart\\Discount\\Facades\\CartDiscount"
+            }
+        }
+    }
+}
