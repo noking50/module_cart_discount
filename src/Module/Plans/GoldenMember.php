@@ -11,8 +11,8 @@ class GoldenMember {
 
     protected $discountGoldenMemberService;
 
-    public function __construct(ModuleCartDiscountGoldenMemberService $discountGoldenMemberService) {
-        $this->discountGoldenMemberService = $discountGoldenMemberService;
+    public function __construct() {
+        $this->discountGoldenMemberService = \App::make(ModuleCartDiscountGoldenMemberService::class);
     }
 
     public function getList() {
