@@ -20,7 +20,7 @@ class ModuleCartDiscountGoldenMemberProductRepository {
 
     # List
 
-    public function getListFromParent($parent_id) {
+    public function getListByParent($parent_id) {
         $column_product_pk = config('module_cart_discount.datacolumn.product.pk');
         $column_product_name = config('module_cart_discount.datacolumn.product.name');
         
@@ -42,8 +42,9 @@ class ModuleCartDiscountGoldenMemberProductRepository {
 
     # Detail
 
-    public function detail($id, $columns = ['*']) {
+    public function detail($parent_id, $id, $columns = ['*']) {
         $dataRow = $this->discountGoldenMemberProduct
+                ->where("{$this->table}.{$this->table_parent}_id", '=', $parent_id)
                 ->where("{$this->table}.id", '=', $id)
                 ->first($columns);
 
@@ -58,13 +59,14 @@ class ModuleCartDiscountGoldenMemberProductRepository {
         return $result;
     }
 
-    public function update($id, $data) {
-        $before = $this->detail($id);
+    public function update($parent_id, $id, $data) {
+        $before = $this->detail($parent_id, $id);
         $result = $this->discountGoldenMemberProduct
+                ->where("{$this->table}.{$this->table_parent}_id", '=', $parent_id)
                 ->where("{$this->table}.id", '=', $id)
                 ->usable()
                 ->update($data);
-        $after = $this->detail($id);
+        $after = $this->detail($parent_id, $id);
 
         if ($before && $after && is_null($before->deprecated_at)) {
             return collect([
@@ -75,9 +77,10 @@ class ModuleCartDiscountGoldenMemberProductRepository {
         return null;
     }
 
-    public function delete($id) {
-        $before = $this->detail($id);
+    public function delete($parent_id, $id) {
+        $before = $this->detail($parent_id, $id);
         $result = $this->discountGoldenMemberProduct
+                ->where("{$this->table}.{$this->table_parent}_id", '=', $parent_id)
                 ->where("{$this->table}.id", '=', $id)
                 ->usable()
                 ->delete();
