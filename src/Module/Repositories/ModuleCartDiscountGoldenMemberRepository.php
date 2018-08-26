@@ -51,13 +51,13 @@ class ModuleCartDiscountGoldenMemberRepository {
     public function getDetailBackend($id) {
         $column_member_pk = config('module_cart_discount.datacolumn.member.pk');
         $column_member_name = config('module_cart_discount.datacolumn.member.name');
-        
+
         $dataRow = $this->discountGoldenMember->select([
                     "{$this->table}.id",
                     "{$this->table}.created_at",
                     "{$this->table}.updated_at",
-                    "{$this->table}.code",
                     "{$this->table_member}.{$column_member_name} AS member_name",
+                    "{$this->table}.code",
                     "{$this->table}.type",
                     "{$this->table}.discount_all",
                     "{$this->table}.date_start",
@@ -77,14 +77,14 @@ class ModuleCartDiscountGoldenMemberRepository {
     public function getDetailBackendEdit($id) {
         $column_member_pk = config('module_cart_discount.datacolumn.member.pk');
         $column_member_name = config('module_cart_discount.datacolumn.member.name');
-        
+
         $dataRow = $this->discountGoldenMember->select([
                     "{$this->table}.id",
                     "{$this->table}.created_at",
                     "{$this->table}.updated_at",
-                    "{$this->table}.code",
                     "{$this->table}.member_id",
                     "{$this->table_member}.{$column_member_name} AS member_name",
+                    "{$this->table}.code",
                     "{$this->table}.type",
                     "{$this->table}.discount_all",
                     "{$this->table}.date_start",
@@ -101,6 +101,30 @@ class ModuleCartDiscountGoldenMemberRepository {
         return $dataRow;
     }
 
+    # other
+
+    public function isExistMember($member_id, $id = null) {
+        $query = $this->discountGoldenMember
+                ->where("{$this->table}.member_id", '=', $member_id);
+        if (!is_null($id)) {
+            $query->where("{$this->table}.id", '!=', $id)
+                    ->where("{$this->table}.deprecate_flag", '=', 0);
+        }
+
+        return $query->exists();
+    }
+
+    public function isExistCode($code, $id = null) {
+        $query = $this->discountGoldenMember
+                ->where("{$this->table}.code", '=', $code);
+        if (!is_null($id)) {
+            $query->where("{$this->table}.id", '!=', $id)
+                    ->where("{$this->table}.deprecate_flag", '=', 0);
+        }
+
+        return $query->exists();
+    }
+
     # insert update delete
 
     public function insert($data) {
@@ -110,14 +134,14 @@ class ModuleCartDiscountGoldenMemberRepository {
     }
 
     public function update($id, $data) {
-        $before = $this->detail($id);
+        $before = $this->getDetail($id);
         $result = $this->discountGoldenMember
                 ->where("{$this->table}.id", '=', $id)
                 ->usable()
                 ->update($data);
-        $after = $this->detail($id);
+        $after = $this->getDetail($id);
 
-        if ($before && $after && is_null($before->deprecated_at)) {
+        if ($before && $after && $before->deprecate_flag == 0) {
             return collect([
                 'before' => $before,
                 'after' => $after,
@@ -127,13 +151,13 @@ class ModuleCartDiscountGoldenMemberRepository {
     }
 
     public function delete($id) {
-        $before = $this->detail($id);
+        $before = $this->getDetail($id);
         $result = $this->discountGoldenMember
                 ->where("{$this->table}.id", '=', $id)
                 ->usable()
                 ->delete();
 
-        if ($before && is_null($before->deprecated_at)) {
+        if ($before && $before->deprecate_flag == 0) {
             return collect([
                 'before' => $before,
                 'after' => null,

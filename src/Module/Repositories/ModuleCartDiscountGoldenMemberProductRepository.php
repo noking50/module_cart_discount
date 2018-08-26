@@ -27,11 +27,20 @@ class ModuleCartDiscountGoldenMemberProductRepository {
         $dataSet = $this->discountGoldenMemberProduct->select([
                     "{$this->table}.id",
                     "{$this->table}.{$this->table_parent}_id",
+                    "{$this->table_product}_cate_main.id AS product_cate_main_id",
+                    "{$this->table_product}_cate_sub1.id AS product_cate_sub1_id",
+                    "{$this->table_product}_cate_sub.id AS product_cate_sub_id",
                     "{$this->table}.product_id",
+                    "{$this->table_product}_cate_main.name AS product_cate_main_name",
+                    "{$this->table_product}_cate_sub1.name AS product_cate_sub1_name",
+                    "{$this->table_product}_cate_sub.name AS product_cate_sub_name",
                     "{$this->table_product}.{$column_product_name} AS product_name",
                     "{$this->table}.discount",
                 ])
                 ->leftJoin($this->table_product, "{$this->table}.product_id", '=', "{$this->table_product}.{$column_product_pk}")
+                ->leftJoin("{$this->table_product}_cate_sub", "{$this->table_product}.{$this->table_product}_cate_sub_id", '=', "{$this->table_product}_cate_sub.id")
+                ->leftJoin("{$this->table_product}_cate_sub1", "{$this->table_product}_cate_sub.{$this->table_product}_cate_sub1_id", '=', "{$this->table_product}_cate_sub1.id")
+                ->leftJoin("{$this->table_product}_cate_main", "{$this->table_product}_cate_sub1.{$this->table_product}_cate_main_id", '=', "{$this->table_product}_cate_main.id")
                 ->where("{$this->table}.{$this->table_parent}_id", '=', $parent_id)
                 ->usable()
                 ->orderBy("{$this->table}.id", 'asc')
@@ -42,7 +51,7 @@ class ModuleCartDiscountGoldenMemberProductRepository {
 
     # Detail
 
-    public function detail($parent_id, $id, $columns = ['*']) {
+    public function getDetail($parent_id, $id, $columns = ['*']) {
         $dataRow = $this->discountGoldenMemberProduct
                 ->where("{$this->table}.{$this->table_parent}_id", '=', $parent_id)
                 ->where("{$this->table}.id", '=', $id)
@@ -60,15 +69,15 @@ class ModuleCartDiscountGoldenMemberProductRepository {
     }
 
     public function update($parent_id, $id, $data) {
-        $before = $this->detail($parent_id, $id);
+        $before = $this->getDetail($parent_id, $id);
         $result = $this->discountGoldenMemberProduct
                 ->where("{$this->table}.{$this->table_parent}_id", '=', $parent_id)
                 ->where("{$this->table}.id", '=', $id)
                 ->usable()
                 ->update($data);
-        $after = $this->detail($parent_id, $id);
+        $after = $this->getDetail($parent_id, $id);
 
-        if ($before && $after && is_null($before->deprecated_at)) {
+        if ($before && $after && $before->deprecate_flag == 0) {
             return collect([
                 'before' => $before,
                 'after' => $after,
@@ -78,14 +87,14 @@ class ModuleCartDiscountGoldenMemberProductRepository {
     }
 
     public function delete($parent_id, $id) {
-        $before = $this->detail($parent_id, $id);
+        $before = $this->getDetail($parent_id, $id);
         $result = $this->discountGoldenMemberProduct
                 ->where("{$this->table}.{$this->table_parent}_id", '=', $parent_id)
                 ->where("{$this->table}.id", '=', $id)
                 ->usable()
                 ->delete();
 
-        if ($before && is_null($before->deprecated_at)) {
+        if ($before && $before->deprecate_flag == 0) {
             return collect([
                 'before' => $before,
                 'after' => null,

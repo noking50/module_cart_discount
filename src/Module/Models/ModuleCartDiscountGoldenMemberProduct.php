@@ -14,7 +14,7 @@ class ModuleCartDiscountGoldenMemberProduct extends BaseModel {
     }
 
     public function scopeUsable($query) {
-        return $query->whereNull($this->table . '.deprecated_at');
+        return $query->where($this->table . '.deprecate_flag', '=', 0);
     }
 
     /**

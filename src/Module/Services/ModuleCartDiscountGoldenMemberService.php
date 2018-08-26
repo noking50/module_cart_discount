@@ -24,40 +24,49 @@ class ModuleCartDiscountGoldenMemberService {
     }
 
     public function getDetailBackend($id) {
-        $dataRow = $this->moduleBannerCarouselRepository->detailBackend($id, $group);
+        $dataRow = $this->discountGoldenMemberRepository->getDetailBackend($id);
 
         if (!empty($dataRow)) {
-            $dataSet_lang = $this->moduleBannerCarouselLangRepository->listAll($id);
-            foreach ($dataSet_lang as $k => $v) {
-                $dataSet_lang[$k]->photo = \FileUpload::getFiles($v->photo);
-                $dataSet_lang[$k]->photo_m = \FileUpload::getFiles($v->photo_m);
-            }
-            $dataRow->lang = $dataSet_lang->keyBy('lang');
+            $dataSet_golden_member_product = $this->discountGoldenMemberProductRepository->getListByParent($id);
+            $dataRow->product = $dataSet_golden_member_product;
         }
 
         return $dataRow;
     }
 
     public function getDetailBackendEdit($id) {
-        $dataRow = $this->moduleBannerCarouselRepository->detailBackendEdit($id, $group);
+        $dataRow = $this->discountGoldenMemberRepository->getDetailBackendEdit($id);
 
         if (!empty($dataRow)) {
-            $dataSet_lang = $this->moduleBannerCarouselLangRepository->listAll($id);
-            $dataRow->lang = $dataSet_lang->keyBy('lang');
+            $dataSet_golden_member_product = $this->discountGoldenMemberProductRepository->getListByParent($id);
+            $dataRow->product = $dataSet_golden_member_product;
         }
 
         return $dataRow;
     }
 
+    public function isMemberExist($member_id, $id = null) {
+        $is_exist = $this->discountGoldenMemberRepository->isExistMember($member_id, $id);
+
+        return $is_exist;
+    }
+
+    public function isCodeExist($code, $id = null) {
+        $is_exist = $this->discountGoldenMemberRepository->isExistCode($code, $id);
+
+        return $is_exist;
+    }
+    
     #
 
     public function add($data) {
         $data_insert = [
             "create_admin_id" => User::id(),
             "update_admin_id" => User::id(),
-            'code' => array_get($data, 'code', '') ?: '',
             'deprecated_at' => null,
             'member_id' => array_get($data, 'member_id'),
+            'code' => array_get($data, 'code', '') ?: '',
+            'deprecate_flag' => 0,
             'type' => array_get($data, 'type'),
             'discount_all' => array_get($data, 'discount_all'),
             'date_start' => array_get($data, 'date_start'),
@@ -73,7 +82,6 @@ class ModuleCartDiscountGoldenMemberService {
     public function edit($id, $data) {
         $data_update = [
             "update_admin_id" => User::id(),
-            'code' => array_get($data, 'code', '') ?: '',
             'type' => array_get($data, 'type'),
             'discount_all' => array_get($data, 'discount_all'),
             'date_start' => array_get($data, 'date_start'),
@@ -87,7 +95,7 @@ class ModuleCartDiscountGoldenMemberService {
     }
 
     public function delete($id) {
-        $result = $this->discountGoldenMemberRepository->delete($id, $group);
+        $result = $this->discountGoldenMemberRepository->delete($id);
 
         return $result;
     }
@@ -106,15 +114,16 @@ class ModuleCartDiscountGoldenMemberService {
 
     public function addProduct($parent_id, $data) {
         $parent_table = config('module_cart_discount.datatable.golden_member');
-        $data_product = array_get($data, 'product', []);
+        $data_product = collect(array_get($data, 'product', []))->keyBy('product_id');
         $result = collect();
         foreach ($data_product as $k => $v) {
             $data_insert = [
                 "create_admin_id" => User::id(),
                 "update_admin_id" => User::id(),
+                'deprecated_at' => null,
                 "{$parent_table}_id" => $parent_id,
                 'product_id' => array_get($v, 'product_id'),
-                'deprecated_at' => null,
+                'deprecate_flag' => 0,
                 'discount' => array_get($v, 'discount'),
             ];
             $result->put($k, $this->discountGoldenMemberProductRepository->insert($data_insert));
@@ -133,9 +142,10 @@ class ModuleCartDiscountGoldenMemberService {
             $data_insert = [
                 "create_admin_id" => User::id(),
                 "update_admin_id" => User::id(),
+                'deprecated_at' => null,
                 "{$parent_table}_id" => $parent_id,
                 'product_id' => array_get($v, 'product_id'),
-                'deprecated_at' => null,
+                'deprecate_flag' => 0,
                 'discount' => array_get($v, 'discount'),
             ];
             $result_add->put($k, $this->discountGoldenMemberProductRepository->insert($data_insert));
@@ -172,6 +182,7 @@ class ModuleCartDiscountGoldenMemberService {
         $data_del = collect();
         foreach ($data_new as $k => $v) {
             if (isset($data_old[$k])) {
+                $v['id'] = $data_old[$k]['id'];
                 $data_edit->put($k, $v);
             } else {
                 $data_add->put($k, $v);

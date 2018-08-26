@@ -8,13 +8,13 @@ class ModuleCartDiscountGoldenMemberValidation extends BaseValidation {
 
     public function validate_add($request_data = null) {
         $rules = [
-            'code' => ['string', 'required', 'max:10'],
             'member_id' => ['integer', 'required'],
+            'code' => ['string', 'required', 'max:10'],
             'type' => ['integer', 'required'],
             'discount_all' => ['numeric', 'max:1', 'min:0'],
             'date_start' => ['date_format:Y/m/d', 'required', 'max:10'],
             'date_end' => ['date_format:Y/m/d', 'nullable', 'max:10', 'after_or_equal:date_start'],
-            'description' => ['string', 'required', 'max:10'],
+            'description' => ['string', 'max:10'],
             'status' => ['integer', 'required', 'in:0,1'],
             'product' => ['array'],
         ];
@@ -32,7 +32,7 @@ class ModuleCartDiscountGoldenMemberValidation extends BaseValidation {
             }
         }
 
-        return $this->validate($rules, $request_data, $attributes, [
+        return $this->validate($rules, $request_data, $attributes, [], [
                     ['discount_all', ['required'], function($input) {
                             return $input->{"type"} == 1;
                         }],
@@ -45,29 +45,37 @@ class ModuleCartDiscountGoldenMemberValidation extends BaseValidation {
     public function validate_edit($request_data = null) {
         $rules = [
             'id' => ['integer', 'required'],
-            'button_link' => ['string', 'nullable', 'max:200'],
+            'type' => ['integer', 'required'],
+            'discount_all' => ['numeric', 'max:1', 'min:0'],
+            'date_start' => ['date_format:Y/m/d', 'required', 'max:10'],
+            'date_end' => ['date_format:Y/m/d', 'nullable', 'max:10', 'after_or_equal:date_start'],
+            'description' => ['string', 'max:10'],
             'status' => ['integer', 'required', 'in:0,1'],
-            'lang' => ['array'],
+            'product' => ['array'],
         ];
-        $rules_lang = [
-            'name' => ['string', 'required', 'max:100'],
-            'title' => ['string', 'nullable', 'max:100'],
-            'subtitle' => ['string', 'nullable', 'max:100'],
-            'photo' => ['required', new JsonFile(1, 1)],
-            'photo_m' => ['required', new JsonFile(1, 1)],
-            'button_text' => ['string', 'nullable', 'max:50'],
+
+        $rules_product = [
+            'product_id' => ['integer', 'required'],
+            'discount' => ['numeric', 'required', 'max:1', 'min:0'],
         ];
         $attributes = array_merge(
-                trans('module_required::validation.attributes'), trans('module_banner_carousel::validation.attributes.module_banner_carousel')
+                trans('module_required::validation.attributes'), trans('module_cart_discount::validation.attributes.module_cart_discount_golden_member'), trans('module_cart_discount::validation.attributes.module_cart_discount_golden_member_product')
         );
-        foreach ($rules_lang as $k => $v) {
-            $rules['lang.*.' . $k] = $v;
+        foreach ($rules_product as $k => $v) {
+            $rules['product.*.' . $k] = $v;
             if (isset($attributes[$k])) {
-                $attributes['lang.*.' . $k] = $attributes[$k];
+                $attributes['product.*.' . $k] = $attributes[$k];
             }
         }
 
-        return $this->validate($rules, $request_data, $attributes);
+        return $this->validate($rules, $request_data, $attributes, [], [
+                    ['discount_all', ['required'], function($input) {
+                            return $input->{"type"} == 1;
+                        }],
+                    ['product', ['required'], function($input) {
+                            return $input->{"type"} == 2;
+                        }],
+        ]);
     }
 
 }
