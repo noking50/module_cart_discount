@@ -139,7 +139,9 @@ class ModuleCartDiscountGoldenMemberService {
         }
 
         //
-        $result['add_product'] = $this->addProduct($dataRow->id, $data);
+        if (!empty($result['add'])) {
+            $result['add_product'] = $this->addProduct($result['add']->id, $data);
+        }
 
         return collect($result);
     }
