@@ -125,21 +125,24 @@ class ModuleCartDiscountGoldenMemberRepository {
         return $query->exists();
     }
 
-    public function isDateLatest($id, $date_start) {
+    public function isDateLatest($id, $date_start, $is_exclude = true) {
         $member_id = $this->discountGoldenMember
                 ->where("{$this->table}.id", '=', $id)
                 ->value('member_id');
 
-        $is_exist = $this->discountGoldenMember
-                        ->where("{$this->table}.member_id", '=', $member_id)
-                        ->where("{$this->table}.status", '=', 1)
-                        ->where("{$this->table}.id", '!=', $id)
-                        ->where(function ($query) use ($date_start, $this) {
-                            $query->where("{$this->table}.date_start", '>=', $date_start)
-                            ->orWhere("{$this->table}.date_end", '>=', $date_start);
-                        })->exists();
+        $query = $this->discountGoldenMember
+                ->where("{$this->table}.member_id", '=', $member_id)
+                ->where("{$this->table}.status", '=', 1)
+                ->where("{$this->table}.id", '!=', $id)
+                ->where(function ($query) use ($date_start) {
+            $query->where("{$this->table}.date_start", '>=', $date_start)
+            ->orWhere("{$this->table}.date_end", '>=', $date_start);
+        });
+        if ($is_exclude) {
+            $query->where("{$this->table}.id", '!=', $id);
+        }
 
-        return !$is_exist;
+        return !$query->exists();
     }
 
     # insert update delete

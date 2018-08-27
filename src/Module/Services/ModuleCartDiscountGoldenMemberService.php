@@ -57,8 +57,8 @@ class ModuleCartDiscountGoldenMemberService {
         return $is_exist;
     }
 
-    public function isDateLatest($id, $date_start) {
-        $is_latest = $this->discountGoldenMemberRepository->isDateLatest($id, $date_start);
+    public function isDateLatest($id, $date_start, $is_exclude = true) {
+        $is_latest = $this->discountGoldenMemberRepository->isDateLatest($id, $date_start, $is_exclude);
 
         return $is_latest;
     }
@@ -101,7 +101,7 @@ class ModuleCartDiscountGoldenMemberService {
     }
 
     public function replace($id, $data) {
-        $dataRow = $this->discountGoldenMemberRepository->getDetailBackend($id);
+        $dataRow = $this->discountGoldenMemberRepository->getDetail($id);
         if (empty($dataRow) || $dataRow->deprecate_flag != 0) {
             return null;
         }

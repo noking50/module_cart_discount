@@ -134,7 +134,7 @@ class GoldenMember {
         $date_start = Request::input('date_start');
         DB::beginTransaction();
         try {
-            $is_date_latest = $this->discountGoldenMemberService->isDateLatest($id, $date_start);
+            $is_date_latest = $this->discountGoldenMemberService->isDateLatest($id, $date_start, false);
             if (!$is_date_latest) {
                 throw new DatabaseLogicException(trans('module_cart_discount::database.golden_member.date_start_latest'));
             }
