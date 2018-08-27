@@ -32,7 +32,9 @@ class ModuleCartDiscountGoldenMemberValidation extends BaseValidation {
             }
         }
 
-        return $this->validate($rules, $request_data, $attributes, [], [
+        return $this->validate($rules, $request_data, $attributes, [
+                    'date_end.after_or_equal' => ":attribute 日期必須在 {$attributes['date_start']} 日期之後或相同.",
+                        ], [
                     ['discount_all', ['required'], function($input) {
                             return $input->{"type"} == 1;
                         }],
@@ -68,7 +70,9 @@ class ModuleCartDiscountGoldenMemberValidation extends BaseValidation {
             }
         }
 
-        return $this->validate($rules, $request_data, $attributes, [], [
+        return $this->validate($rules, $request_data, $attributes, [
+                    'date_end.after_or_equal' => ":attribute 日期必須在 {$attributes['date_start']} 日期之後或相同.",
+                        ], [
                     ['discount_all', ['required'], function($input) {
                             return $input->{"type"} == 1;
                         }],

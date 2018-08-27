@@ -62,7 +62,7 @@ class ModuleCartDiscountGoldenMember extends BaseModel {
         return $query;
     }
 
-    public function getCreateMemberAdminNameAttribute($value) {
+    public function getCreateAdminNameAttribute($value) {
         if (!is_null($this->{"create_admin_id"}) && $this->{"create_admin_id"} == 0) {
             return config('user.group.admin.super.name');
         }
@@ -70,7 +70,7 @@ class ModuleCartDiscountGoldenMember extends BaseModel {
         return $value;
     }
 
-    public function getUpdateMemberAdminNameAttribute($value) {
+    public function getUpdateAdminNameAttribute($value) {
         if (!is_null($this->{"update_admin_id"}) && $this->{"update_admin_id"} == 0) {
             return config('user.group.admin.super.name');
         }

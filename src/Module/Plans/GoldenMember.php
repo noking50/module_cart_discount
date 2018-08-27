@@ -30,7 +30,19 @@ class GoldenMember {
     }
 
     public function getDetail() {
+        $id = Route::input('id', 0);
         
+        $dataRow_discount_golden_member = $this->discountGoldenMemberService->getDetailBackend($id);
+
+        return $dataRow_discount_golden_member;
+    }
+
+    public function getDetailEdit() {
+        $id = Route::input('id', 0);
+        
+        $dataRow_discount_golden_member = $this->discountGoldenMemberService->getDetailBackendEdit($id);
+
+        return $dataRow_discount_golden_member;
     }
 
     public function add() {
