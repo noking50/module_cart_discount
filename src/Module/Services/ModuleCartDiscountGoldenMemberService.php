@@ -110,6 +110,7 @@ class ModuleCartDiscountGoldenMemberService {
         $dt_now = new \DateTime();
         $data['member_id'] = $dataRow->member_id;
         $data['code'] = $dataRow->code;
+        $data['status'] = 1;
         $result = array(
             'add' => null,
             'edit' => null,
