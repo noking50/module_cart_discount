@@ -133,7 +133,6 @@ class ModuleCartDiscountGoldenMemberRepository {
         $query = $this->discountGoldenMember
                 ->where("{$this->table}.member_id", '=', $member_id)
                 ->where("{$this->table}.status", '=', 1)
-                ->where("{$this->table}.id", '!=', $id)
                 ->where(function ($query) use ($date_start) {
             $query->where("{$this->table}.date_start", '>=', $date_start)
             ->orWhere("{$this->table}.date_end", '>=', $date_start);
