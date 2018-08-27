@@ -128,7 +128,7 @@ class GoldenMember {
     }
 
     public function replace() {
-        $this->discountGoldenMemberValidation->validate_edit();
+        $this->discountGoldenMemberValidation->validate_replace();
 
         $id = Request::input('id');
         $date_start = Request::input('date_start');
