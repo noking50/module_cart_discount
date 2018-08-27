@@ -125,6 +125,23 @@ class ModuleCartDiscountGoldenMemberRepository {
         return $query->exists();
     }
 
+    public function isDateLatest($id, $date_start) {
+        $member_id = $this->discountGoldenMember
+                ->where("{$this->table}.id", '=', $id)
+                ->value('member_id');
+
+        $is_exist = $this->discountGoldenMember
+                        ->where("{$this->table}.member_id", '=', $member_id)
+                        ->where("{$this->table}.status", '=', 1)
+                        ->where("{$this->table}.id", '!=', $id)
+                        ->where(function ($query) use ($date_start, $this) {
+                            $query->where("{$this->table}.date_start", '>=', $date_start)
+                            ->orWhere("{$this->table}.date_end", '>=', $date_start);
+                        })->exists();
+
+        return !$is_exist;
+    }
+
     # insert update delete
 
     public function insert($data) {

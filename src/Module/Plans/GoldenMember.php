@@ -15,7 +15,16 @@ use DBLog;
  */
 class GoldenMember {
 
+    /**
+     *
+     * @var ModuleCartDiscountGoldenMemberService
+     */
     protected $discountGoldenMemberService;
+
+    /**
+     *
+     * @var ModuleCartDiscountGoldenMemberValidation
+     */
     protected $discountGoldenMemberValidation;
 
     public function __construct() {
@@ -31,7 +40,7 @@ class GoldenMember {
 
     public function getDetail() {
         $id = Route::input('id', 0);
-        
+
         $dataRow_discount_golden_member = $this->discountGoldenMemberService->getDetailBackend($id);
 
         return $dataRow_discount_golden_member;
@@ -39,7 +48,7 @@ class GoldenMember {
 
     public function getDetailEdit() {
         $id = Route::input('id', 0);
-        
+
         $dataRow_discount_golden_member = $this->discountGoldenMemberService->getDetailBackendEdit($id);
 
         return $dataRow_discount_golden_member;
@@ -81,8 +90,14 @@ class GoldenMember {
         $this->discountGoldenMemberValidation->validate_edit();
 
         $id = Request::input('id');
+        $date_start = Request::input('date_start');
         DB::beginTransaction();
         try {
+            $is_date_latest = $this->discountGoldenMemberService->isDateLatest($id, $date_start);
+            if (!$is_date_latest) {
+                throw new DatabaseLogicException(trans('module_cart_discount::database.golden_member.date_start_latest'));
+            }
+            
             $result = $this->discountGoldenMemberService->edit($id, Request::all());
             $result_product = null;
             if ($result) {
@@ -113,7 +128,39 @@ class GoldenMember {
     }
 
     public function replace() {
-        
+        $this->discountGoldenMemberValidation->validate_edit();
+
+        $id = Request::input('id');
+        $date_start = Request::input('date_start');
+        DB::beginTransaction();
+        try {
+            $is_date_latest = $this->discountGoldenMemberService->isDateLatest($id, $date_start);
+            if (!$is_date_latest) {
+                throw new DatabaseLogicException(trans('module_cart_discount::database.golden_member.date_start_latest'));
+            }
+            
+            $result = $this->discountGoldenMemberService->replace($id, Request::all());
+            if (is_null($result)) {
+                throw new DatabaseLogicException(trans('module_cart_discount::database.golden_member.replace_not_exist'));
+            }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+
+        $datatable_golden_member = config('module_cart_discount.datatable.golden_member');
+        $datatable_golden_member_product = config('module_cart_discount.datatable.golden_member_product');
+        // dblog
+        DBLog::write($datatable_golden_member, array_get($result['edit'], 'before'), array_get($result['edit'], 'after'));
+        DBLog::write($datatable_golden_member, null, $result['add']);
+        foreach ($result['edit_product'] as $k => $v) {
+            DBLog::write($datatable_golden_member_product, array_get($v, 'before'), array_get($v, 'after'));
+        }
+        foreach ($result['add_product'] as $k => $v) {
+            DBLog::write($datatable_golden_member_product, null, $v);
+        }
     }
 
     public function editStatus() {

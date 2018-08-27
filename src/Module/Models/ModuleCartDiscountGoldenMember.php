@@ -3,6 +3,8 @@
 namespace Noking50\Modules\Cart\Discount\Models;
 
 use Noking50\Modules\Required\Models\BaseModel;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 class ModuleCartDiscountGoldenMember extends BaseModel {
 

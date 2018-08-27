@@ -27,6 +27,23 @@ class ModuleCartDiscountGoldenMemberProductRepository {
         $dataSet = $this->discountGoldenMemberProduct->select([
                     "{$this->table}.id",
                     "{$this->table}.{$this->table_parent}_id",
+                    "{$this->table}.product_id",
+                    "{$this->table}.discount",
+                ])
+                ->where("{$this->table}.{$this->table_parent}_id", '=', $parent_id)
+                ->usable()
+                ->orderBy("{$this->table}.id", 'asc')
+                ->get();
+
+        return $dataSet;
+    }
+    public function getListInfoByParent($parent_id) {
+        $column_product_pk = config('module_cart_discount.datacolumn.product.pk');
+        $column_product_name = config('module_cart_discount.datacolumn.product.name');
+        
+        $dataSet = $this->discountGoldenMemberProduct->select([
+                    "{$this->table}.id",
+                    "{$this->table}.{$this->table_parent}_id",
                     "{$this->table_product}_cate_main.id AS product_cate_main_id",
                     "{$this->table_product}_cate_sub1.id AS product_cate_sub1_id",
                     "{$this->table_product}_cate_sub.id AS product_cate_sub_id",

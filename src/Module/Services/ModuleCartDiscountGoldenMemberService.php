@@ -27,7 +27,7 @@ class ModuleCartDiscountGoldenMemberService {
         $dataRow = $this->discountGoldenMemberRepository->getDetailBackend($id);
 
         if (!empty($dataRow)) {
-            $dataSet_golden_member_product = $this->discountGoldenMemberProductRepository->getListByParent($id);
+            $dataSet_golden_member_product = $this->discountGoldenMemberProductRepository->getListInfoByParent($id);
             $dataRow->product = $dataSet_golden_member_product;
         }
 
@@ -38,7 +38,7 @@ class ModuleCartDiscountGoldenMemberService {
         $dataRow = $this->discountGoldenMemberRepository->getDetailBackendEdit($id);
 
         if (!empty($dataRow)) {
-            $dataSet_golden_member_product = $this->discountGoldenMemberProductRepository->getListByParent($id);
+            $dataSet_golden_member_product = $this->discountGoldenMemberProductRepository->getListInfoByParent($id);
             $dataRow->product = $dataSet_golden_member_product;
         }
 
@@ -56,7 +56,13 @@ class ModuleCartDiscountGoldenMemberService {
 
         return $is_exist;
     }
-    
+
+    public function isDateLatest($id, $date_start) {
+        $is_latest = $this->discountGoldenMemberRepository->isDateLatest($id, $date_start);
+
+        return $is_latest;
+    }
+
     #
 
     public function add($data) {
@@ -92,6 +98,50 @@ class ModuleCartDiscountGoldenMemberService {
         $result = $this->discountGoldenMemberRepository->update($id, $data_update);
 
         return $result;
+    }
+
+    public function replace($id, $data) {
+        $dataRow = $this->discountGoldenMemberRepository->getDetailBackend($id);
+        if (empty($dataRow) || $dataRow->deprecate_flag != 0) {
+            return null;
+        }
+        $dataSet_golden_member_product = $this->discountGoldenMemberProductRepository->getListByParent($id);
+
+        $dt_now = new \DateTime();
+        $data['member_id'] = $dataRow->member_id;
+        $data['code'] = $dataRow->code;
+        $result = array(
+            'add' => null,
+            'edit' => null,
+            'add_product' => collect(),
+            'edit_product' => collect(),
+        );
+
+        //
+        $data_update = [
+            "update_admin_id" => User::id(),
+            'deprecated_at' => $dt_now,
+            'deprecate_flag' => $dataRow->id,
+        ];
+        $result['edit'] = $this->discountGoldenMemberRepository->update($id, $data_update);
+
+        //
+        $result['add'] = $this->add($data);
+
+        //
+        foreach ($dataSet_golden_member_product as $k => $v) {
+            $data_update = [
+                "update_admin_id" => User::id(),
+                'deprecated_at' => $dt_now,
+                'deprecate_flag' => $v->id,
+            ];
+            $result['edit_product']->put($k, $this->discountGoldenMemberProductRepository->update($dataRow->id, $v->id, $data_update));
+        }
+
+        //
+        $result['add_product'] = $this->addProduct($dataRow->id, $data);
+
+        return collect($result);
     }
 
     public function delete($id) {
