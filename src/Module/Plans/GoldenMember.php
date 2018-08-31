@@ -54,6 +54,28 @@ class GoldenMember {
         return $dataRow_discount_golden_member;
     }
 
+    public function getDiscountByMember($member_id) {
+        $dataRow_discount_golden_member = $this->discountGoldenMemberService->getDetailByMember($member_id);
+
+        return $dataRow_discount_golden_member;
+    }
+
+    public function getDiscountByCode($code) {
+        $dataRow_discount_golden_member = $this->discountGoldenMemberService->getDetailByCode($code);
+
+        return $dataRow_discount_golden_member;
+    }
+
+    public function calculatePrice($product_id, $product_price, $discount_setting) {
+        if ($discount_setting['type'] == 1) {
+            $product_price = ceil($product_price * $discount_setting['discount']);
+        } else if ($discount_setting['type'] == 2 && isset($discount_setting['discount'][$product_id])) {
+            $product_price = ceil($product_price * $discount_setting['discount'][$product_id]);
+        }
+
+        return $product_price;
+    }
+
     public function add() {
         $this->discountGoldenMemberValidation->validate_add();
 
@@ -97,7 +119,7 @@ class GoldenMember {
             if (!$is_date_latest) {
                 throw new DatabaseLogicException(trans('module_cart_discount::database.golden_member.date_start_latest'));
             }
-            
+
             $result = $this->discountGoldenMemberService->edit($id, Request::all());
             $result_product = null;
             if ($result) {
@@ -138,7 +160,7 @@ class GoldenMember {
             if (!$is_date_latest) {
                 throw new DatabaseLogicException(trans('module_cart_discount::database.golden_member.date_start_latest'));
             }
-            
+
             $result = $this->discountGoldenMemberService->replace($id, Request::all());
             if (is_null($result)) {
                 throw new DatabaseLogicException(trans('module_cart_discount::database.golden_member.replace_not_exist'));

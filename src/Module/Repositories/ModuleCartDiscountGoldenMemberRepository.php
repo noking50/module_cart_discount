@@ -3,16 +3,22 @@
 namespace Noking50\Modules\Cart\Discount\Repositories;
 
 use Noking50\Modules\Cart\Discount\Models\ModuleCartDiscountGoldenMember;
+use Noking50\Modules\Cart\Discount\Models\ModuleCartDiscountGoldenMemberBind;
 
 class ModuleCartDiscountGoldenMemberRepository {
 
     protected $discountGoldenMember;
+    protected $discountGoldenMemberBind;
     protected $table;
     protected $table_member;
+    protected $table_bind;
 
-    public function __construct(ModuleCartDiscountGoldenMember $discountGoldenMember) {
+    public function __construct(ModuleCartDiscountGoldenMember $discountGoldenMember
+    , ModuleCartDiscountGoldenMemberBind $discountGoldenMemberBind) {
         $this->discountGoldenMember = $discountGoldenMember;
+        $this->discountGoldenMemberBind = $discountGoldenMemberBind;
         $this->table = $this->discountGoldenMember->getTable();
+        $this->table_bind = $this->discountGoldenMemberBind->getTable();
         $this->table_member = config('module_cart_discount.datatable.member');
     }
 
@@ -95,6 +101,49 @@ class ModuleCartDiscountGoldenMemberRepository {
                 ->leftJoin($this->table_member, "{$this->table}.member_id", '=', "{$this->table_member}.{$column_member_pk}")
                 ->selectUpdaterAdmin()
                 ->where("{$this->table}.id", '=', $id)
+                ->usable()
+                ->first();
+
+        return $dataRow;
+    }
+
+    public function getDetailByMember($member_id) {
+        $bind_member_id = $this->discountGoldenMemberBind
+                ->where("{$this->table_bind}.member_id", '=', $member_id)
+                ->value('bind_member_id');
+        if (is_null($bind_member_id)) {
+            return null;
+        }
+
+        $dataRow = $this->discountGoldenMember->select([
+                    "{$this->table}.id",
+                    "{$this->table}.member_id",
+                    "{$this->table}.code",
+                    "{$this->table}.type",
+                    "{$this->table}.discount_all",
+                    "{$this->table}.date_start",
+                    "{$this->table}.date_end",
+                    "{$this->table}.status",
+                ])
+                ->where("{$this->table}.member_id", '=', $bind_member_id)
+                ->usable()
+                ->first();
+
+        return $dataRow;
+    }
+
+    public function getDetailByCode($code) {
+        $dataRow = $this->discountGoldenMember->select([
+                    "{$this->table}.id",
+                    "{$this->table}.member_id",
+                    "{$this->table}.code",
+                    "{$this->table}.type",
+                    "{$this->table}.discount_all",
+                    "{$this->table}.date_start",
+                    "{$this->table}.date_end",
+                    "{$this->table}.status",
+                ])
+                ->where("{$this->table}.code", '=', $code)
                 ->usable()
                 ->first();
 

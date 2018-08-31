@@ -10,6 +10,8 @@ return [
             'date_start' => '起始日期',
             'date_end' => '結束日期',
             'description' => '說明',
+            #
+            'code_text' => '黃金會員代碼',
         ],
         'module_cart_discount_golden_member_product' => [
             'module_cart_discount_golden_member_id' => '黃金會員ID',

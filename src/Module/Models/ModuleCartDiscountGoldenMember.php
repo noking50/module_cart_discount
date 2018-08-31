@@ -19,6 +19,19 @@ class ModuleCartDiscountGoldenMember extends BaseModel {
         return $query->where($this->table . '.deprecate_flag', '=', 0);
     }
 
+    public function scopeActive($query) {
+        $dt_now = new \DateTime();
+        $date_today = $dt_now->format('Y/m/d');
+
+        return $query->usable()
+                        ->where("{$this->table}.date_start", '<=', $date_today)
+                        ->where(function ($query) use ($date_today) {
+                            $query->where("{$this->table}.date_end", '>=', $date_today)
+                            ->orWhereNull("{$this->table}.date_end");
+                        })
+                        ->where("{$this->table}.status", '=', 1);
+    }
+
     /**
      * 選取後台新增人員
      *

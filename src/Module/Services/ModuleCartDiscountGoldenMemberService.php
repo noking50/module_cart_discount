@@ -45,6 +45,36 @@ class ModuleCartDiscountGoldenMemberService {
         return $dataRow;
     }
 
+    public function getDetailByMember($member_id) {
+        $dataRow = $this->discountGoldenMemberRepository->getDetailByMember($member_id);
+        if (!empty($dataRow)) {
+            $dataRow->is_active = $this->isDiscountActive($dataRow);
+            if ($dataRow->type = 2) {
+                $dataSet_golden_member_product = $this->discountGoldenMemberProductRepository->getListByParent($dataRow->id)->pluck('discount', 'product_id');
+                $dataRow->product = $dataSet_golden_member_product;
+            } else {
+                $dataRow->product = collect();
+            }
+        }
+
+        return $dataRow;
+    }
+
+    public function getDetailByCode($code) {
+        $dataRow = $this->discountGoldenMemberRepository->getDetailByCode($code);
+        if (!empty($dataRow)) {
+            $dataRow->is_active = $this->isDiscountActive($dataRow);
+            if ($dataRow->type = 2) {
+                $dataSet_golden_member_product = $this->discountGoldenMemberProductRepository->getListByParent($dataRow->id)->pluck('discount', 'product_id');
+                $dataRow->product = $dataSet_golden_member_product;
+            } else {
+                $dataRow->product = collect();
+            }
+        }
+
+        return $dataRow;
+    }
+
     public function isMemberExist($member_id, $id = null) {
         $is_exist = $this->discountGoldenMemberRepository->isExistMember($member_id, $id);
 
@@ -63,6 +93,21 @@ class ModuleCartDiscountGoldenMemberService {
         return $is_latest;
     }
 
+    public function isDiscountActive($dataRow){
+        $is_active = true;
+        $dt_today = new \DateTime('today');
+        $dt_start =  new \DateTime($dataRow->date_start);
+        $dt_end = is_null($dataRow->date_end) ? null : new \DateTime($dataRow->date_end);
+        
+        if($dt_today < $dt_start || 
+                (!is_null($dt_end) && $dt_today > $dt_end) || 
+                (isset($dataRow->status) && $dataRow->status != 1)){
+            $is_active = false;
+        }
+        
+        return $is_active;
+    }
+    
     #
 
     public function add($data) {

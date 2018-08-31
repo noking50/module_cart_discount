@@ -21,9 +21,6 @@ class ModuleCartDiscountGoldenMemberProductRepository {
     # List
 
     public function getListByParent($parent_id) {
-        $column_product_pk = config('module_cart_discount.datacolumn.product.pk');
-        $column_product_name = config('module_cart_discount.datacolumn.product.name');
-        
         $dataSet = $this->discountGoldenMemberProduct->select([
                     "{$this->table}.id",
                     "{$this->table}.{$this->table_parent}_id",
