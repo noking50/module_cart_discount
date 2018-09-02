@@ -60,6 +60,12 @@ class GoldenMember {
         return $dataRow_discount_golden_member;
     }
 
+    public function getDiscountByBindMember($member_id) {
+        $dataRow_discount_golden_member = $this->discountGoldenMemberService->getDetailByBindMember($member_id);
+
+        return $dataRow_discount_golden_member;
+    }
+
     public function getDiscountByCode($code) {
         $dataRow_discount_golden_member = $this->discountGoldenMemberService->getDetailByCode($code);
 
@@ -248,6 +254,20 @@ class GoldenMember {
         }
         foreach ($result_product as $k => $v) {
             DBLog::write($datatable_golden_member_product, array_get($v, 'before'), array_get($v, 'after'));
+        }
+    }
+
+    public function bindMember($member_id, $bind_member_id) {
+        $dataRow_bind = $this->discountGoldenMemberService->getDetailBind($member_id);
+        if (is_null($dataRow_bind)) {
+            $dataRow_discount_golden_member_bind = $this->discountGoldenMemberService->addBind($member_id, $bind_member_id);
+
+            try {
+                $datatable_golden_member_bind = config('module_cart_discount.datatable.golden_member_bind');
+                DBLog::write($datatable_golden_member_bind, null, $dataRow_discount_golden_member_bind);
+            } catch (Exception $ex) {
+                
+            }
         }
     }
 

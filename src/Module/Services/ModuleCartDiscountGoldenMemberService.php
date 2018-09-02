@@ -4,17 +4,21 @@ namespace Noking50\Modules\Cart\Discount\Services;
 
 use Noking50\Modules\Cart\Discount\Repositories\ModuleCartDiscountGoldenMemberRepository;
 use Noking50\Modules\Cart\Discount\Repositories\ModuleCartDiscountGoldenMemberProductRepository;
+use Noking50\Modules\Cart\Discount\Repositories\ModuleCartDiscountGoldenMemberBindRepository;
 use User;
 
 class ModuleCartDiscountGoldenMemberService {
 
     protected $discountGoldenMemberRepository;
     protected $discountGoldenMemberProductRepository;
+    protected $discountGoldenMemberBindRepository;
 
     public function __construct(ModuleCartDiscountGoldenMemberRepository $discountGoldenMemberRepository
-    , ModuleCartDiscountGoldenMemberProductRepository $discountGoldenMemberProductRepository) {
+    , ModuleCartDiscountGoldenMemberProductRepository $discountGoldenMemberProductRepository
+    , ModuleCartDiscountGoldenMemberBindRepository $discountGoldenMemberBindRepository) {
         $this->discountGoldenMemberRepository = $discountGoldenMemberRepository;
         $this->discountGoldenMemberProductRepository = $discountGoldenMemberProductRepository;
+        $this->discountGoldenMemberBindRepository = $discountGoldenMemberBindRepository;
     }
 
     public function getListBackend() {
@@ -46,7 +50,12 @@ class ModuleCartDiscountGoldenMemberService {
     }
 
     public function getDetailByMember($member_id) {
-        $dataRow = $this->discountGoldenMemberRepository->getDetailByMember($member_id);
+        $dataRow_bind = $this->getDetailBind($member_id);
+        if (is_null($dataRow_bind)) {
+            return null;
+        }
+
+        $dataRow = $this->discountGoldenMemberRepository->getDetailByMember($dataRow_bind->bind_member_id);
         if (!empty($dataRow)) {
             $dataRow->is_active = $this->isDiscountActive($dataRow);
             if ($dataRow->type = 2) {
@@ -75,6 +84,27 @@ class ModuleCartDiscountGoldenMemberService {
         return $dataRow;
     }
 
+    public function getDetailByBindMember($member_id) {
+        $dataRow = $this->discountGoldenMemberRepository->getDetailByMember($member_id);
+        if (!empty($dataRow)) {
+            $dataRow->is_active = $this->isDiscountActive($dataRow);
+            if ($dataRow->type = 2) {
+                $dataSet_golden_member_product = $this->discountGoldenMemberProductRepository->getListByParent($dataRow->id)->pluck('discount', 'product_id');
+                $dataRow->product = $dataSet_golden_member_product;
+            } else {
+                $dataRow->product = collect();
+            }
+        }
+
+        return $dataRow;
+    }
+    
+    public function getDetailBind($member_id) {
+        $dataRow_bind = $this->discountGoldenMemberBindRepository->getDetail($member_id);
+
+        return $dataRow_bind;
+    }
+
     public function isMemberExist($member_id, $id = null) {
         $is_exist = $this->discountGoldenMemberRepository->isExistMember($member_id, $id);
 
@@ -93,21 +123,21 @@ class ModuleCartDiscountGoldenMemberService {
         return $is_latest;
     }
 
-    public function isDiscountActive($dataRow){
+    public function isDiscountActive($dataRow) {
         $is_active = true;
         $dt_today = new \DateTime('today');
-        $dt_start =  new \DateTime($dataRow->date_start);
+        $dt_start = new \DateTime($dataRow->date_start);
         $dt_end = is_null($dataRow->date_end) ? null : new \DateTime($dataRow->date_end);
-        
-        if($dt_today < $dt_start || 
-                (!is_null($dt_end) && $dt_today > $dt_end) || 
-                (isset($dataRow->status) && $dataRow->status != 1)){
+
+        if ($dt_today < $dt_start ||
+                (!is_null($dt_end) && $dt_today > $dt_end) ||
+                (isset($dataRow->status) && $dataRow->status != 1)) {
             $is_active = false;
         }
-        
+
         return $is_active;
     }
-    
+
     #
 
     public function add($data) {
@@ -297,6 +327,18 @@ class ModuleCartDiscountGoldenMemberService {
             'edit' => $data_edit,
             'delete' => $data_del,
         ]);
+    }
+
+    #bind member
+
+    public function addBind($member_id, $bind_member_id) {
+        $data_insert = [
+            "member_id" => $member_id,
+            "bind_member_id" => $bind_member_id,
+        ];
+        $result = $this->discountGoldenMemberBindRepository->insert($data_insert);
+
+        return $result;
     }
 
 }

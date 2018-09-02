@@ -3,22 +3,16 @@
 namespace Noking50\Modules\Cart\Discount\Repositories;
 
 use Noking50\Modules\Cart\Discount\Models\ModuleCartDiscountGoldenMember;
-use Noking50\Modules\Cart\Discount\Models\ModuleCartDiscountGoldenMemberBind;
 
 class ModuleCartDiscountGoldenMemberRepository {
 
     protected $discountGoldenMember;
-    protected $discountGoldenMemberBind;
     protected $table;
     protected $table_member;
-    protected $table_bind;
 
-    public function __construct(ModuleCartDiscountGoldenMember $discountGoldenMember
-    , ModuleCartDiscountGoldenMemberBind $discountGoldenMemberBind) {
+    public function __construct(ModuleCartDiscountGoldenMember $discountGoldenMember) {
         $this->discountGoldenMember = $discountGoldenMember;
-        $this->discountGoldenMemberBind = $discountGoldenMemberBind;
         $this->table = $this->discountGoldenMember->getTable();
-        $this->table_bind = $this->discountGoldenMemberBind->getTable();
         $this->table_member = config('module_cart_discount.datatable.member');
     }
 
@@ -108,13 +102,6 @@ class ModuleCartDiscountGoldenMemberRepository {
     }
 
     public function getDetailByMember($member_id) {
-        $bind_member_id = $this->discountGoldenMemberBind
-                ->where("{$this->table_bind}.member_id", '=', $member_id)
-                ->value('bind_member_id');
-        if (is_null($bind_member_id)) {
-            return null;
-        }
-
         $dataRow = $this->discountGoldenMember->select([
                     "{$this->table}.id",
                     "{$this->table}.member_id",
@@ -125,7 +112,7 @@ class ModuleCartDiscountGoldenMemberRepository {
                     "{$this->table}.date_end",
                     "{$this->table}.status",
                 ])
-                ->where("{$this->table}.member_id", '=', $bind_member_id)
+                ->where("{$this->table}.member_id", '=', $member_id)
                 ->usable()
                 ->first();
 
