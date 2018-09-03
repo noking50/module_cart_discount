@@ -1,6 +1,6 @@
 # Module Cart Discount
 
-banner carousel
+cart discount
 
 ## Installing
 
