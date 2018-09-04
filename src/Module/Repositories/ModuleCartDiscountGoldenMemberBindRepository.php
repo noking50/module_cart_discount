@@ -11,7 +11,7 @@ class ModuleCartDiscountGoldenMemberBindRepository {
 
     public function __construct(ModuleCartDiscountGoldenMemberBind $discountGoldenMemberBind) {
         $this->discountGoldenMemberBind = $discountGoldenMemberBind;
-        $this->table = $this->discountGoldenMemberProduct->getTable();
+        $this->table = $this->discountGoldenMemberBind->getTable();
     }
 
     # List
