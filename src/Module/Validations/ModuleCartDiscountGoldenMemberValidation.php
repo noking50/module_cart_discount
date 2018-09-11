@@ -9,7 +9,7 @@ class ModuleCartDiscountGoldenMemberValidation extends BaseValidation {
     public function validate_add($request_data = null) {
         $rules = [
             'member_id' => ['integer', 'required'],
-            'code' => ['string', 'required', 'max:10'],
+            'code' => ['string', 'required', 'max:8'],
             'type' => ['integer', 'required', 'in:1,2'],
             'discount_all' => ['numeric', 'max:1', 'min:0'],
             'date_start' => ['date_format:Y/m/d', 'required', 'max:10'],

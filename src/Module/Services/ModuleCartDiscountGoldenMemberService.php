@@ -58,7 +58,7 @@ class ModuleCartDiscountGoldenMemberService {
         $dataRow = $this->discountGoldenMemberRepository->getDetailByMember($dataRow_bind->bind_member_id);
         if (!empty($dataRow)) {
             $dataRow->is_active = $this->isDiscountActive($dataRow);
-            if ($dataRow->type = 2) {
+            if ($dataRow->type == 2) {
                 $dataSet_golden_member_product = $this->discountGoldenMemberProductRepository->getListByParent($dataRow->id)->pluck('discount', 'product_id');
                 $dataRow->product = $dataSet_golden_member_product;
             } else {
@@ -73,7 +73,7 @@ class ModuleCartDiscountGoldenMemberService {
         $dataRow = $this->discountGoldenMemberRepository->getDetailByCode($code);
         if (!empty($dataRow)) {
             $dataRow->is_active = $this->isDiscountActive($dataRow);
-            if ($dataRow->type = 2) {
+            if ($dataRow->type == 2) {
                 $dataSet_golden_member_product = $this->discountGoldenMemberProductRepository->getListByParent($dataRow->id)->pluck('discount', 'product_id');
                 $dataRow->product = $dataSet_golden_member_product;
             } else {
@@ -88,7 +88,7 @@ class ModuleCartDiscountGoldenMemberService {
         $dataRow = $this->discountGoldenMemberRepository->getDetailByMember($member_id);
         if (!empty($dataRow)) {
             $dataRow->is_active = $this->isDiscountActive($dataRow);
-            if ($dataRow->type = 2) {
+            if ($dataRow->type == 2) {
                 $dataSet_golden_member_product = $this->discountGoldenMemberProductRepository->getListByParent($dataRow->id)->pluck('discount', 'product_id');
                 $dataRow->product = $dataSet_golden_member_product;
             } else {
