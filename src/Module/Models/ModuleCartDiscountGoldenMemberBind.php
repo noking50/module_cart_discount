@@ -16,5 +16,9 @@ class ModuleCartDiscountGoldenMemberBind extends BaseModel {
         parent::__construct($attributes);
     }
 
+    public function setUpdatedAt($value) {
+        return;
+    }
+
 
 }
